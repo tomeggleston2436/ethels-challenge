@@ -13,6 +13,9 @@ export default {
         'Orange': '#D8A861',
         'Brown': '#382A1F',
       },
+      backgroundImage:{
+        'hero-pattern': "url('/src/assets/bg.jpg')",
+      },
     },
   },
   plugins: [],

@@ -3,7 +3,7 @@
   </script>
 
 
-  <div class="bg-[url(src/assets/bg.jpg)] bg-cover bg-center bg-no-repeat">
+  <div class="bg-hero-pattern bg-cover bg-center bg-no-repeat">
   <header class="font-playfair bg-LG shadow-md">
     <nav class="container mx-auto flex justify-between items-center p-4 ">
       <h1 class="text-3xl font-bold">
