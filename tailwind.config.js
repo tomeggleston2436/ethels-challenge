@@ -8,6 +8,7 @@ export default {
       colors: {
         'DG': '#294F50',
         'LG': '#6C8685',
+        'HG': '#384a49',
         'LP': '#F8ECEC',
         'Orange': '#D8A861',
         'Brown': '#382A1F',

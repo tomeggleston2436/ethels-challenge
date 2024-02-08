@@ -1,5 +1,5 @@
 <script>
-    import CtaBox from "../components/CTABox.svelte";
+import CtaBox from "../components/CTABox.svelte";
 import ChallengeBox from "../components/ChallengeBox.svelte";
 
 </script>

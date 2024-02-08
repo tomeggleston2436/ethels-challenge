@@ -4,8 +4,8 @@
 
 
   <div class="bg-[url(src/assets/bg.jpg)] bg-cover bg-center bg-no-repeat">
-  <header class="font-playfair bg-LG ">
-    <nav class="container mx-auto flex justify-between items-center p-4">
+  <header class="font-playfair bg-LG shadow-md">
+    <nav class="container mx-auto flex justify-between items-center p-4 ">
       <h1 class="text-3xl font-bold">
         <i class="fa-solid fa-mountain"></i>
         <a href="/" class="hover:text-gray-300 text-Orange">Ethel's Challenge</a>
