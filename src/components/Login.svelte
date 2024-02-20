@@ -1,21 +1,23 @@
 <script>
   import { auth } from '../firebaseConfig';
   import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+  import { goto } from '$app/navigation';
 
   let email = '';
   let password = '';
   let isLogin = true;
 
   async function login() {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Logged in user:', userCredential.user);
-      // Redirect user or show login success message
-    } catch (error) {
-      console.error('Error logging in:', error);
-      // Show error message to your user
-    }
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('Logged in user:', userCredential.user);
+    alert('Login Successful'); // Temporarily show an alert or implement a more integrated notification
+    goto('/profile'); // Redirect to the profile page
+  } catch (error) {
+    console.error('Error logging in:', error);
+    alert('Login Failed: ' + error.message); // Show error
   }
+}
 
   async function signup() {
     try {
