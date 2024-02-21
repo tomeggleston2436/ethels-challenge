@@ -11,6 +11,7 @@ export default {
         'HG': '#384a49',
         'LP': '#F8ECEC',
         'Orange': '#D8A861',
+        'hover-orange': '#ac864d',
         'Brown': '#382A1F',
       },
       backgroundImage:{
