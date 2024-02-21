@@ -2,7 +2,7 @@
 
 
 
-import { supabase } from './supabaseConfig';
+import { supabase } from '../supabaseConfig';
 
 
 
