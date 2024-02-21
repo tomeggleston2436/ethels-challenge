@@ -1,80 +1,66 @@
 <script>
-    import { goto } from '$app/navigation';
-  
-    let email = '';
-    let password = '';
-    let isLogin = true;
-    let confirmPassword = '';
-    let firstName = '';
-    let lastName = '';
-  
-    async function login() {
-      try {
-        const response = await fetch('/supabase', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            
-          },
-          body: JSON.stringify({ action: 'login', email, password }),
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          // Success! Handle Supabase login success accordingly
-          console.log('Logged in user:', data);
-          goto('/profile'); // Example redirect
-        } else {
-          const errorData = await response.json();
-          // Handle errors coming from your API route
-          console.error('Error logging in:', errorData);
-        }
-      } catch (error) {
-        console.error('Error logging in (frontend):', error); // Network issues
-      }
+  import { goto } from '$app/navigation';
+  import { supabase } from '$lib/supabaseConfig';
+
+  let email = '';
+  let password = '';
+  let confirmPassword = '';
+  let isSignup = false; // Updated to reflect the action directly
+
+  async function signUp() {
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
     }
-  
-    async function signup() {
-      try {
-        if (password !== confirmPassword) {
-          alert('Passwords do not match!');
-          return;
-        }
-  
-        const response = await fetch('/supabase', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            
-          },
-          body: JSON.stringify({
-            action: 'signup',
-            email,
-            password,
-            firstName,
-            lastName,
-          }),
-        });
-  
-        if (response.ok) {
-          // Success! Handle signup and redirect
-          console.log('Signup successful!');
-          goto('/profile'); // Example redirect
-        } else {
-          const errorData = await response.json();
-          // Handle errors from the API route
-          console.error('Error signing up:', errorData);
-        }
-      } catch (error) {
-        console.error('Error signing up (frontend):', error); // Network issues
-      }
+
+    const { user, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert('Signup successful! Check your email for a confirmation link.');
+      goto('/profile'); // Adjust as necessary
     }
-  
-    function toggleForm() {
-      isLogin = !isLogin;
+  }
+
+  async function login() {
+    const { error } = await supabase.auth.signIn({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      goto('/profile'); // Adjust as necessary
     }
-  </script>
+  }
+</script>
 
 
+
+{#if isSignup}
+  <form on:submit|preventDefault={signUp}>
+    <!-- Signup form fields -->
+    <input type="email" bind:value={email} placeholder="Email">
+    <input type="password" bind:value={password} placeholder="Password">
+    <input type="password" bind:value={confirmPassword} placeholder="Confirm Password">
+    <button type="submit">Sign Up</button>
+  </form>
+{:else}
+  <form on:submit|preventDefault={login}>
+    <!-- Login form fields -->
+    <input type="email" bind:value={email} placeholder="Email">
+    <input type="password" bind:value={password} placeholder="Password">
+    <button type="submit">Log In</button>
+  </form>
+{/if}
+
+<button on:click={() => isSignup = !isSignup}>
+  {isSignup ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
+</button>
 
 

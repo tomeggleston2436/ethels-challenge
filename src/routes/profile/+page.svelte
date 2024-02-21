@@ -1,6 +1,6 @@
 <script>
     // Import Firebase auth to check user state or display user info
-    import { auth } from '../../firebaseConfig';
+    
 
     import { onMount } from 'svelte';
    
