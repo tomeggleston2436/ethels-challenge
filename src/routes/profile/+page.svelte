@@ -1,26 +1,24 @@
 <script>
-    // Import Firebase auth to check user state or display user info
-    
+  import { onMount } from 'svelte';
+  import { supabase } from '$lib/supabaseConfig'; // Ensure correct path to your Supabase configuration
 
-    import { onMount } from 'svelte';
-   
-  
-    let userProfile = null;
-  
-    onMount(() => {
-      userProfile = auth.currentUser; // Get the current user
-      // Alternatively, use a Svelte store to manage user state
-    });
-  
-    async function connectToStrava() {
-      // Implement Strava connection logic here
-    }
-  </script>
-  
-  {#if userProfile}
+  let userProfile = null;
+
+  onMount(() => {
+    userProfile = supabase.auth.getUser(); // Get the current user from Supabase
+    // Alternatively, use a Svelte store to manage user state globally
+  });
+
+  async function connectToStrava() {
+    // Implement Strava connection logic here
+  }
+</script>
+
+{#if userProfile}
+  <div>
     <h1>Welcome, {userProfile.email}</h1>
-    <button on:click={connectToStrava}>Connect to Strava</button>
-  {:else}
-    <p>Please log in to view this page.</p>
-  {/if}
-  
+    <!-- Display other user information -->
+  </div>
+{:else}
+  <p>Please log in to view this page.</p>
+{/if}

@@ -28,13 +28,13 @@
   }
 
   async function login() {
-    const { error } = await supabase.auth.signIn({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      alert(error.message);
+      alert(error.message); // Display the error to the user        
     } else {
       goto('/profile'); // Adjust as necessary
     }
