@@ -1,10 +1,12 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import dotenv from 'dotenv';
+import { config as dotenvConfig } from 'dotenv';
 
-dotenv.config(); // Load environment variables
-
+dotenvConfig();
 
 export default defineConfig({
-	plugins: [sveltekit()]
+  plugins: [sveltekit()],
+  define: {
+    'process.env': process.env
+  }
 });
