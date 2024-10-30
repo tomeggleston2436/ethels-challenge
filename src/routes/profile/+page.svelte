@@ -2,56 +2,17 @@
     import { onMount } from 'svelte';
     import { ethels } from '$lib/ethels';
     import { stravaStore } from '$lib/stores/stravaStore';
-    import { processActivities } from '$lib/peakUtils';
+    import { processActivities, formatDate } from '$lib/peakUtils';
     
-    let visitedPeaks = new Set();
+    let visitedPeaks = new Map();
     let loading = true;
     let error = null;
     let showVisitedPeaks = false;
     let showRemainingPeaks = false;
 
-    function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    }
-
     $: if ($stravaStore.activities) {
-        visitedPeaks = new Set($stravaStore.activities.map(activity => {
-            if (activity.start_latlng) {
-                for (const peak of ethels) {
-                    const distance = getDistanceFromLatLonInKm(
-                        activity.start_latlng[0],
-                        activity.start_latlng[1],
-                        peak.lat,
-                        peak.lng
-                    );
-                    if (distance <= 0.2) {
-                        return peak.name;
-                    }
-                }
-            }
-            return null;
-        }).filter(Boolean));
+        visitedPeaks = processActivities($stravaStore.activities, ethels);
         loading = false;
-    }
-
-    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = deg2rad(lat2 - lat1);
-        const dLon = deg2rad(lon2 - lon1);
-        const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    function deg2rad(deg) {
-        return deg * (Math.PI/180);
     }
 
     onMount(() => {
@@ -129,11 +90,14 @@
                         </button>
                         {#if showVisitedPeaks}
                             <div class="p-4 space-y-2">
-                                {#each Array.from(visitedPeaks) as peakName}
+                                {#each Array.from(visitedPeaks.entries()) as [peakName, info]}
                                     <div class="flex items-center justify-between p-3 bg-green-50 rounded hover:bg-green-100 transition-colors">
                                         <div class="flex items-center">
                                             <span class="text-green-600 mr-2">✓</span>
                                             <span>{peakName}</span>
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            {formatDate(info.date)}
                                         </div>
                                     </div>
                                 {/each}
