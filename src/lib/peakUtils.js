@@ -85,11 +85,13 @@ function decodePolyline(encoded) {
 export function processActivities(activities, peaks) {
     const visitedPeaks = new Map(); // Changed to Map to store dates
 
+    if (!activities || !peaks) return visitedPeaks;
+
     activities.forEach(activity => {
         peaks.forEach(peak => {
             if (checkPeakVisit(activity, peak)) {
                 // Only update if this is the earliest completion
-                if (!visitedPeaks.has(peak.name) || 
+                if (!visitedPeaks.has(peak.name) ||
                     new Date(activity.start_date) < new Date(visitedPeaks.get(peak.name).date)) {
                     visitedPeaks.set(peak.name, {
                         date: activity.start_date,
@@ -101,4 +103,12 @@ export function processActivities(activities, peaks) {
     });
     
     return visitedPeaks;
+}
+
+export function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
 }
