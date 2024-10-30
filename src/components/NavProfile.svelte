@@ -3,14 +3,14 @@
     let athlete = null;
     let showDropdown = false;
 
-    async function fetchAthleteData() {
+    async function checkAuth() {
         try {
             const response = await fetch('/api/athlete');
             if (response.ok) {
                 athlete = await response.json();
             }
         } catch (error) {
-            console.error('Error fetching athlete data:', error);
+            console.error('Error fetching athlete:', error);
         }
     }
 
@@ -19,12 +19,14 @@
     }
 
     onMount(() => {
-        fetchAthleteData();
+        checkAuth();
     });
 </script>
 
 <div 
-    class="relative group"
+    class="relative"
+    on:mouseenter={() => showDropdown = true}
+    on:mouseleave={() => showDropdown = false}
 >
     {#if athlete}
         <button 
@@ -44,25 +46,28 @@
             <span>{athlete.firstname}</span>
         </button>
 
-        <div 
-            class="absolute right-0 mt-2 w-48 bg-LG rounded-lg shadow-lg py-1 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 ease-in-out"
-        >
-            <a 
-                href="/profile" 
-                class="block px-4 py-2 text-white hover:bg-Orange hover:text-white transition-colors duration-150"
+        {#if showDropdown}
+            <div 
+                class="absolute right-0 mt-2 w-48 bg-LG rounded-lg shadow-lg py-1 z-50 transition-opacity duration-150 ease-in-out"
+                style="opacity: {showDropdown ? '1' : '0'}"
             >
-                Profile
-            </a>
-            <button 
-                on:click={handleLogout}
-                class="block w-full text-left px-4 py-2 text-white hover:bg-Orange hover:text-white transition-colors duration-150"
-            >
-                Logout
-            </button>
-        </div>
+                <a 
+                    href="/profile" 
+                    class="block px-4 py-2 text-white hover:bg-Orange hover:text-white transition-colors duration-150"
+                >
+                    Profile
+                </a>
+                <button 
+                    on:click={handleLogout}
+                    class="block w-full text-left px-4 py-2 text-white hover:bg-Orange hover:text-white transition-colors duration-150"
+                >
+                    Logout
+                </button>
+            </div>
+        {/if}
     {:else}
         <a 
-            href="/login"
+            href="/api/login"
             class="hover:text-gray-300 flex items-center gap-2"
         >
             <i class="fa-solid fa-right-to-bracket"></i>
@@ -70,15 +75,3 @@
         </a>
     {/if}
 </div>
-
-<style>
-    /* Add a small buffer area between button and dropdown to prevent accidental closing */
-    .group:hover .absolute::before {
-        content: '';
-        position: absolute;
-        top: -8px;
-        left: 0;
-        right: 0;
-        height: 8px;
-    }
-</style>
