@@ -1,43 +1,23 @@
 <script>
-  import { onMount } from 'svelte';
-  import { ethels } from '$lib/ethels';
-  import { processActivities } from '$lib/peakUtils';
-  
-  let athlete = null;
-  let activities = [];
-  let visitedPeaks = new Map();
-  let loading = true;
-  let error = null;
-  let showVisitedPeaks = false;
-  let showRemainingPeaks = false;
+    import { onMount } from 'svelte';
+    import { ethels } from '$lib/ethels';
+    import { stravaStore } from '$lib/stores/stravaStore';
+    import { processActivities } from '$lib/utils';
+    
+    let visitedPeaks = new Set();
+    let loading = true;
+    let error = null;
+    let showVisitedPeaks = false;
+    let showRemainingPeaks = false;
 
-  function formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString('en-GB', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
-      });
-  }
+    $: if ($stravaStore.activities) {
+        visitedPeaks = processActivities($stravaStore.activities, ethels);
+        loading = false;
+    }
 
-  onMount(async () => {
-      try {
-          const athleteResponse = await fetch('/api/athlete');
-          if (!athleteResponse.ok) throw new Error('Failed to fetch athlete data');
-          athlete = await athleteResponse.json();
-          
-          const activitiesResponse = await fetch('/api/activities');
-          if (!activitiesResponse.ok) throw new Error('Failed to fetch activities');
-          activities = await activitiesResponse.json();
-          
-          visitedPeaks = processActivities(activities, ethels);
-          
-      } catch (err) {
-          error = err.message;
-          console.error('Error:', err);
-      } finally {
-          loading = false;
-      }
-  });
+    onMount(() => {
+        stravaStore.refreshData();
+    });
 </script>
 
 <div class="max-w-4xl mx-auto p-4">
@@ -54,20 +34,20 @@
       <div class="grid md:grid-cols-3 gap-6 mb-6">
           <!-- Profile Info -->
           <div class="bg-white rounded-lg shadow p-6">
-              {#if athlete}
-                  {#if athlete.profile}
+              {#if $stravaStore.athlete}
+                  {#if $stravaStore.athlete.profile}
                       <img 
-                          src={athlete.profile} 
+                          src={$stravaStore.athlete.profile} 
                           alt="Profile" 
                           class="w-32 h-32 rounded-full mx-auto"
                       />
                   {:else}
                       <div class="w-32 h-32 rounded-full bg-Orange mx-auto flex items-center justify-center text-3xl text-white">
-                          {athlete.firstname?.[0] || 'U'}
+                          {$stravaStore.athlete.firstname?.[0] || 'U'}
                       </div>
                   {/if}
                   <h2 class="text-xl font-bold text-center mt-4">
-                      {athlete.firstname} {athlete.lastname}
+                      {$stravaStore.athlete.firstname} {$stravaStore.athlete.lastname}
                   </h2>
               {/if}
           </div>
