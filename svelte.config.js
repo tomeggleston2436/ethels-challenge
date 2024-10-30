@@ -1,4 +1,3 @@
-import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { config as dotenvConfig } from 'dotenv';
 import adapter from '@sveltejs/adapter-netlify';
@@ -9,9 +8,9 @@ dotenvConfig();
 const config = {
   kit: {
     adapter: adapter(),
-        alias: {
-            '$lib': './src/lib'
-        }
+    alias: {
+      '$lib': './src/lib'
+    }
   },
   preprocess: vitePreprocess()
 };
