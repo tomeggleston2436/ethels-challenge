@@ -3,7 +3,7 @@
     import { onMount } from 'svelte';
     import { peaks } from '$lib/ethels';
     import { stravaStore } from '$lib/stores/stravaStore';
-    import { processActivities } from '$lib/utils';
+    import { processActivities } from '$lib/peakUtils';
     
     let error = null;
     let visitedPeaks = new Set();
