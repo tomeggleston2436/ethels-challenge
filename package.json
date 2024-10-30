@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@supabase/supabase-js": "^2.39.7",
 		"cookie": "^1.0.1",
-		"dotenv": "^16.4.5"
+		"dotenv": "^16.4.5",
+		"@sveltejs/adapter-netlify": "^2.0.0"
 	}
 }

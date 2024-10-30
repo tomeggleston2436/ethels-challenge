@@ -1,10 +1,8 @@
-import { redirect } from '@sveltejs/kit';
-
-/** @type {import('./$types').RequestHandler} */
 export async function GET({ url, locals }) {
+    // Get code from URL search params
     const code = url.searchParams.get('code');
     if (!code) {
-        throw redirect(303, '/');
+        return new Response('Authorization code not found', { status: 400 });
     }
 
     try {
@@ -15,31 +13,26 @@ export async function GET({ url, locals }) {
                 client_id: import.meta.env.VITE_STRAVA_CLIENT_ID,
                 client_secret: import.meta.env.VITE_STRAVA_CLIENT_SECRET,
                 code: code,
-                grant_type: 'authorization_code'
+                grant_type: 'authorization_code',
+                redirect_uri: import.meta.env.VITE_STRAVA_REDIRECT_URI || 'https://ethels.netlify.app/'
             })
         });
 
         if (!response.ok) {
-            throw new Error('Failed to exchange token');
+            throw new Error(`Failed to exchange authorization code: ${await response.text()}`);
         }
 
         const data = await response.json();
         
-        // Initialize session if it doesn't exist
-        if (!locals.session) {
-            locals.session = {};
-        }
+        // Store token in the session
+        locals.session.data = { accessToken: data.access_token };
         
-        // Set session data
-        locals.session.data = { 
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            expiresAt: data.expires_at
-        };
-
-        throw redirect(303, '/dashboard');
+        // Redirect to dashboard with base URL
+        const baseUrl = import.meta.env.VITE_BASE_URL || 'https://ethels.netlify.app/';
+        return Response.redirect(`${baseUrl}/dashboard`, 302);
     } catch (error) {
         console.error('Auth error:', error);
-        throw redirect(303, '/?error=auth_failed');
+        const baseUrl = import.meta.env.VITE_BASE_URL || 'https://ethels.netlify.app/';
+        return Response.redirect(`${baseUrl}?error=auth_failed`, 302);
     }
 }
