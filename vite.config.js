@@ -6,6 +6,7 @@ dotenvConfig();
 
 export default defineConfig({
   plugins: [sveltekit()],
+  assetsInclude: ['**/*.svg'],
   define: {
     'process.env': process.env
   }
