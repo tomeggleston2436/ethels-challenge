@@ -1,82 +1,28 @@
 <script>
-  import { goto } from '$app/navigation';
-  import { supabase } from '$lib/supabaseConfig';
-
-  let email = '';
-  let password = '';
-  let confirmPassword = '';
-  let isLogin = true;
-  let name = '';
-
-  async function signUp() {
-    if (password !== confirmPassword) {
-      alert('Passwords do not match!');
-      return;
-    }
-
-    const { user, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert('Signup successful! Check your email for a confirmation link.');
-      goto('/profile'); // Adjust as necessary
-    }
-  }
-
-  async function login() {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      alert(error.message); // Display the error to the user        
-    } else {
-      goto('/profile'); // Adjust as necessary
-    }
-  }
-
-  function toggleForm() {
-    isLogin = !isLogin;
+  function handleStravaLogin() {
+      window.location.href = '/api/login';
   }
 </script>
 
-
-
-<form on:submit|preventDefault={isLogin ? login : signUp} class="space-y-6 bg-LP p-6 shadow-md rounded-lg max-w-md mx-auto my-8">
-  {#if !isLogin}
-    <div>
-      <label for="name" class="block text-sm font-medium text-DG">Name</label>
-      <input type="text" bind:value={name} id="name" class="mt-1 block w-full px-3 py-2 bg-white border border-DG rounded-md shadow-sm focus:outline-none focus:ring-Orange focus:border-Orange" placeholder="Full Name" required>
-    </div>
-  {/if}
+<div class="max-w-md mx-auto my-16 p-8 bg-LP rounded-lg shadow-lg text-center">
+  <h1 class="text-2xl font-bold text-DG mb-6">Welcome to Ethel's Challenge</h1>
   
-  <div>
-    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-    <input type="email" bind:value={email} id="email" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="you@example.com" required>
-  </div>
+  <p class="mb-8 text-gray-600">
+      Track your progress climbing the Peak District's Ethels using your Strava activities.
+  </p>
 
-  <div>
-    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-    <input type="password" bind:value={password} id="password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="••••••••" required>
-  </div>
-
-  {#if !isLogin}
-    <div>
-      <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-      <input type="password" bind:value={confirmPassword} id="confirm-password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="••••••••" required>
-    </div>
-  {/if}
-
-  <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-Orange hover:bg-hover-orange focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-    {isLogin ? 'Login' : 'Sign Up'}
+  <button 
+      on:click={handleStravaLogin}
+      class="inline-block transition-opacity hover:opacity-90"
+  >
+      <img 
+          src="/src/assets/btn_strava_connectwith_orange.svg" 
+          alt="Connect with Strava"
+          class="h-12"
+      />
   </button>
 
-  <button type="button" on:click={toggleForm} class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-HG hover:bg-DG focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-HG">
-    {isLogin ? 'Need an account? Sign up' : 'Already have an account? Log in'}
-  </button>
-</form>
+  <p class="mt-6 text-sm text-gray-500">
+      You'll need a Strava account to track your activities.
+  </p>
+</div>

@@ -1,8 +1,10 @@
-// src/routes/api/callback/+server.js
+import { redirect } from '@sveltejs/kit';
+
+/** @type {import('./$types').RequestHandler} */
 export async function GET({ url, locals }) {
     const code = url.searchParams.get('code');
     if (!code) {
-        return new Response('Authorization code not found', { status: 400 });
+        throw redirect(303, '/');
     }
 
     try {
@@ -10,26 +12,34 @@ export async function GET({ url, locals }) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                client_id: process.env.VITE_STRAVA_CLIENT_ID,
-                client_secret: process.env.VITE_STRAVA_CLIENT_SECRET,
+                client_id: import.meta.env.VITE_STRAVA_CLIENT_ID,
+                client_secret: import.meta.env.VITE_STRAVA_CLIENT_SECRET,
                 code: code,
-                grant_type: 'authorization_code',
-                redirect_uri: process.env.VITE_STRAVA_REDIRECT_URI
+                grant_type: 'authorization_code'
             })
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to exchange authorization code: ${await response.text()}`);
+            throw new Error('Failed to exchange token');
         }
 
         const data = await response.json();
         
-        // Store token in the session or a secure place
-        locals.session.data = { accessToken: data.access_token };
+        // Initialize session if it doesn't exist
+        if (!locals.session) {
+            locals.session = {};
+        }
+        
+        // Set session data
+        locals.session.data = { 
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            expiresAt: data.expires_at
+        };
 
-        // Redirect to a dashboard or home page
-        return Response.redirect('/dashboard', 302);
+        throw redirect(303, '/dashboard');
     } catch (error) {
-        return new Response(error.message, { status: 500 });
+        console.error('Auth error:', error);
+        throw redirect(303, '/?error=auth_failed');
     }
 }
