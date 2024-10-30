@@ -3,10 +3,10 @@
     import { onMount } from 'svelte';
     import { peaks } from '$lib/ethels';
     import { stravaStore } from '$lib/stores/stravaStore';
-    import { processActivities } from '$lib/peakUtils';
+    import { processActivities } from '$lib/utils';
     
     let error = null;
-    let visitedPeaks = new Map();
+    let visitedPeaks = new Set();
 
     $: if ($stravaStore.activities) {
         visitedPeaks = processActivities($stravaStore.activities, peaks);
