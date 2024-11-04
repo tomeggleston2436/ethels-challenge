@@ -133,14 +133,22 @@
             <h3 class="text-xl font-bold mb-4">Recent Activities</h3>
             <div class="space-y-2">
                 {#each $stravaStore.activities?.slice(0, 5) || [] as activity}
-                    <div class="p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
-                        <div class="font-medium">{activity.name}</div>
-                        <div class="text-sm text-gray-600">
-                            {formatDate(activity.start_date)}
-                            - {(activity.distance / 1000).toFixed(2)} km
-                        </div>
-                    </div>
-                {/each}
+    <div class="p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
+        <div class="font-medium">{activity.name}</div>
+        <div class="text-sm text-gray-600">
+            {formatDate(activity.start_date)}
+            - {(activity.distance / 1000).toFixed(2)} km
+            <a 
+                href={`https://www.strava.com/activities/${activity.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ml-2 font-medium text-[#FC4C02] hover:underline"
+            >
+                View on Strava
+            </a>
+        </div>
+    </div>
+{/each}
             </div>
         </div>
     {/if}

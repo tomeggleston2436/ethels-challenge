@@ -51,7 +51,7 @@
         </div>
     {:else}
         <a 
-            href="/api/login"
+            href="/login"
             class="hover:text-gray-300 flex items-center gap-2"
         >
             <i class="fa-solid fa-right-to-bracket"></i>

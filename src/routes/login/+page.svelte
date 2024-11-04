@@ -16,13 +16,17 @@
         class="inline-block transition-opacity hover:opacity-90"
     >
         <img 
-            src="/btn_strava_connectwith_orange.svg" 
+            src="src\static\btn_strava_connectwith_orange.svg" 
             alt="Connect with Strava"
             class="h-12"
         />
     </button>
 
-    <p class="mt-6 text-sm text-gray-500">
-        You'll need a Strava account to track your activities.
-    </p>
+    <div class="mt-8">
+        <img 
+            src="src\static\api_logo_pwrdBy_strava_stack_gray.png"
+            alt="Powered by Strava"
+            class="h-8 mx-auto"
+        />
+    </div>
 </div>
