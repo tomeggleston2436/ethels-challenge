@@ -89,20 +89,30 @@
                             <i class="fas fa-chevron-{showVisitedPeaks ? 'up' : 'down'}"></i>
                         </button>
                         {#if showVisitedPeaks}
-                            <div class="p-4 space-y-2">
-                                {#each Array.from(visitedPeaks.entries()) as [peakName, info]}
-                                    <div class="flex items-center justify-between p-3 bg-green-50 rounded hover:bg-green-100 transition-colors">
-                                        <div class="flex items-center">
-                                            <span class="text-green-600 mr-2">✓</span>
-                                            <span>{peakName}</span>
-                                        </div>
-                                        <div class="text-sm text-gray-600">
-                                            {formatDate(info.date)}
-                                        </div>
-                                    </div>
-                                {/each}
-                            </div>
-                        {/if}
+    <div class="p-4 space-y-2">
+        {#each Array.from(visitedPeaks.entries()) as [peakName, info]}
+            <div class="flex items-center justify-between p-3 bg-green-50 rounded hover:bg-green-100 transition-colors">
+                <div class="flex items-center">
+                    <span class="text-green-600 mr-2">✓</span>
+                    <span>{peakName}</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-600">
+                        {formatDate(info.date)}
+                    </span>
+                    <a 
+                        href={`https://www.strava.com/activities/${info.activityId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-sm font-medium text-[#FC4C02] hover:underline"
+                    >
+                        View on Strava
+                    </a>
+                </div>
+            </div>
+        {/each}
+    </div>
+{/if}
                     </div>
 
                     <!-- Remaining Peaks -->

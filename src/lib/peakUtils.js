@@ -83,7 +83,7 @@ function decodePolyline(encoded) {
 }
 
 export function processActivities(activities, peaks) {
-    const visitedPeaks = new Map(); // Changed to Map to store dates
+    const visitedPeaks = new Map();
 
     if (!activities || !peaks) return visitedPeaks;
 
@@ -95,7 +95,8 @@ export function processActivities(activities, peaks) {
                     new Date(activity.start_date) < new Date(visitedPeaks.get(peak.name).date)) {
                     visitedPeaks.set(peak.name, {
                         date: activity.start_date,
-                        activityName: activity.name
+                        activityName: activity.name,
+                        activityId: activity.id // Add the activity ID
                     });
                 }
             }

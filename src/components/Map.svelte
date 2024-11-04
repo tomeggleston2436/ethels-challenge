@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { peaks } from '$lib/ethels';
   export let stravaData = null;
-  export let visitedPeaks = new Set();
+  export let visitedPeaks = new Map(); 
 
   let mapElement;
   let map;
@@ -51,58 +51,70 @@
   }
 
   function addMarkers() {
-      // Clear existing markers
-      markers.forEach(marker => marker.setMap(null));
-      markers = [];
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
 
-      // Custom marker icons
-      const uncompletedIcon = {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: '#FF4444',
-          fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: '#FFFFFF',
-          scale: 8
-      };
+        const uncompletedIcon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF4444',
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#FFFFFF',
+            scale: 8
+        };
 
-      const completedIcon = {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: '#44FF44',
-          fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: '#FFFFFF',
-          scale: 8
-      };
+        const completedIcon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#44FF44',
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#FFFFFF',
+            scale: 8
+        };
 
-      peaks.forEach((peak, index) => {
-          const isCompleted = visitedPeaks.has(peak.name);
+        peaks.forEach((peak, index) => {
+            const completionInfo = visitedPeaks.get(peak.name);
+            const isCompleted = !!completionInfo;
 
-          const marker = new google.maps.Marker({
-              position: { lat: peak.lat, lng: peak.lng },
-              map: map,
-              title: peak.name,
-              icon: isCompleted ? completedIcon : uncompletedIcon,
-              animation: google.maps.Animation.DROP,
-              optimized: true,
-              zIndex: peaks.length - index
-          });
+            const marker = new google.maps.Marker({
+                position: { lat: peak.lat, lng: peak.lng },
+                map: map,
+                title: peak.name,
+                icon: isCompleted ? completedIcon : uncompletedIcon,
+                animation: google.maps.Animation.DROP,
+                optimized: true,
+                zIndex: peaks.length - index
+            });
 
-          marker.addListener('click', () => {
-              const content = `
-                  <div class="p-3">
-                      <h3 class="font-bold mb-2">${peak.name}</h3>
-                      <p class="text-sm mb-1">Status: ${isCompleted ? '✅ Completed' : '⏳ Not visited yet'}</p>
-                      <p class="text-sm">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
-                  </div>
-              `;
-              infowindow.setContent(content);
-              infowindow.open(map, marker);
-          });
+            marker.addListener('click', () => {
+                const content = `
+                    <div class="p-3">
+                        <h3 class="font-bold mb-2">${peak.name}</h3>
+                        <p class="text-sm mb-1">Status: ${isCompleted ? '✅ Completed' : '⏳ Not visited yet'}</p>
+                        ${isCompleted ? `
+                            <p class="text-sm mb-1">Completed: ${formatDate(completionInfo.date)}</p>
+                            <p class="text-sm mb-1">During: ${completionInfo.activityName}</p>
+                            <p class="text-sm">
+                                <a 
+                                    href="https://www.strava.com/activities/${completionInfo.activityId}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="font-medium text-[#FC4C02] hover:underline"
+                                >
+                                    View on Strava
+                                </a>
+                            </p>
+                        ` : ''}
+                        <p class="text-sm mt-2 text-gray-600">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
+                    </div>
+                `;
+                infowindow.setContent(content);
+                infowindow.open(map, marker);
+            });
 
-          markers.push(marker);
-      });
-  }
-
+            markers.push(marker);
+        });
+    }
   // Watch for changes in visitedPeaks
   $: if (visitedPeaks && map) {
       addMarkers();
