@@ -27,9 +27,9 @@
         <div class="container mx-auto flex justify-between items-center">
             <p>&copy; 2024 Ethel's Challenge. All rights reserved.</p>
             <img 
-                src="src\static\api_logo_pwrdBy_strava_stack_gray.png"
+                src="src/static/api_logo_pwrdBy_strava_stack_white.png"
                 alt="Powered by Strava"
-                class="h-6"
+                class="h-8"
             />
         </div>
     </footer>
