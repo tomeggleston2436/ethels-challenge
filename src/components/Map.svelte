@@ -3,7 +3,7 @@
     import { peaks } from '$lib/ethels';
     import { formatDate } from '$lib/peakUtils';
     export let stravaData = null;
-    export let visitedPeaks = new Map();
+    export let visitedPeaks = null;
 
     let mapElement;
     let map;
@@ -29,6 +29,8 @@
     }
 
     function addMarkers() {
+        if (!map) return;
+
         // Clear existing markers
         markers.forEach(marker => marker.setMap(null));
         markers = [];
@@ -52,11 +54,8 @@
         };
 
         peaks.forEach((peak, index) => {
-            const completionInfo = visitedPeaks.get(peak.name);
-            const isCompleted = Boolean(completionInfo);
-
-            // Debug log
-            console.log('Peak:', peak.name, 'Completed:', isCompleted, 'Info:', completionInfo);
+            const isCompleted = visitedPeaks?.has(peak.name) || false;
+            const completionInfo = visitedPeaks?.get(peak.name);
 
             const marker = new google.maps.Marker({
                 position: { lat: peak.lat, lng: peak.lng },
@@ -69,32 +68,36 @@
             });
 
             marker.addListener('click', () => {
-                // Debug log
-                console.log('Marker clicked:', peak.name, 'Info:', completionInfo);
-
-                const content = `
+                let content = `
                     <div class="p-3">
                         <h3 class="font-bold mb-2">${peak.name}</h3>
                         <p class="text-sm mb-1">Status: ${isCompleted ? '✅ Completed' : '⏳ Not visited yet'}</p>
-                        ${isCompleted ? `
-                            <p class="text-sm mb-1">Completed: ${formatDate(completionInfo.date)}</p>
-                            <p class="text-sm mb-1">During: ${completionInfo.activityName}</p>
-                            <p class="text-sm">
-                                <a 
-                                    href="https://www.strava.com/activities/${completionInfo.activityId}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style="color: #FC4C02; font-weight: 500; text-decoration: none;"
-                                    onmouseover="this.style.textDecoration='underline'"
-                                    onmouseout="this.style.textDecoration='none'"
-                                >
-                                    View on Strava
-                                </a>
-                            </p>
-                        ` : ''}
+                `;
+
+                if (isCompleted && completionInfo) {
+                    content += `
+                        <p class="text-sm mb-1">Completed: ${formatDate(completionInfo.date)}</p>
+                        <p class="text-sm mb-1">During: ${completionInfo.activityName}</p>
+                        <p class="text-sm">
+                            <a 
+                                href="https://www.strava.com/activities/${completionInfo.activityId}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style="color: #FC4C02; font-weight: 500; text-decoration: none;"
+                                onmouseover="this.style.textDecoration='underline'"
+                                onmouseout="this.style.textDecoration='none'"
+                            >
+                                View on Strava
+                            </a>
+                        </p>
+                    `;
+                }
+
+                content += `
                         <p class="text-sm mt-2 text-gray-600">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
                     </div>
                 `;
+
                 infowindow.setContent(content);
                 infowindow.open(map, marker);
             });
@@ -112,22 +115,22 @@
 
     function updateLegend() {
         if (legend && map) {
+            const completedCount = visitedPeaks?.size || 0;
             legend.innerHTML = `
                 <div class="text-sm font-bold mb-2">Peak Status</div>
                 <div class="flex items-center mb-1">
                     <div class="w-4 h-4 rounded-full bg-[#44FF44] mr-2"></div>
-                    <span class="text-sm">Completed (${visitedPeaks.size})</span>
+                    <span class="text-sm">Completed (${completedCount})</span>
                 </div>
                 <div class="flex items-center">
                     <div class="w-4 h-4 rounded-full bg-[#FF4444] mr-2"></div>
-                    <span class="text-sm">Not visited (${peaks.length - visitedPeaks.size})</span>
+                    <span class="text-sm">Not visited (${peaks.length - completedCount})</span>
                 </div>
             `;
         }
     }
 
-    $: if (visitedPeaks && map) {
-        console.log('visitedPeaks updated:', visitedPeaks);
+    $: if (map && visitedPeaks) {
         addMarkers();
         updateLegend();
     }
