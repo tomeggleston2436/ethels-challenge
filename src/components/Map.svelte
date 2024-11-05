@@ -110,7 +110,7 @@
                             </p>
                         ` : ''}
                         <p class="text-sm mt-2">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
-                        <p class="text-sm mb-1">Date completed: ${completionInfo.activity.start_date}</p>
+                        
                     </div>
                 `;
                 infowindow.setContent(content);
