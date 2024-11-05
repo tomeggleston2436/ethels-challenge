@@ -6,7 +6,7 @@
     import { processActivities } from '$lib/peakUtils';
     
     let error = null;
-    let visitedPeaks = new Map();
+    let visitedPeaks = new Set();
 
     $: if ($stravaStore.activities) {
         visitedPeaks = processActivities($stravaStore.activities, peaks);
