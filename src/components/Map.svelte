@@ -92,6 +92,7 @@
                     <div class="p-3">
                         <h3 class="font-bold mb-2">${peak.name}</h3>
                         <p class="text-sm mb-1">Status: ${isCompleted ? '✅ Completed' : '⏳ Not visited yet'}</p>
+                        
                         <p class="text-sm">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
                     </div>
                 `;
@@ -102,6 +103,8 @@
             markers.push(marker);
         });
     }
+
+    
   
     // Watch for changes in visitedPeaks
     $: if (visitedPeaks && map) {
