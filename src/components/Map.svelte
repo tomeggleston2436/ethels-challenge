@@ -1,8 +1,9 @@
 <script>
     import { onMount } from 'svelte';
     import { peaks } from '$lib/ethels';
+    import { getDistanceFromLatLonInKm, checkPeakVisit } from '$lib/peakUtils';
     export let stravaData = null;
-    export let visitedPeaks = new Set();
+    export let visitedPeaks = new Map();
   
     let mapElement;
     let map;
@@ -75,7 +76,8 @@
         };
   
         peaks.forEach((peak, index) => {
-            const isCompleted = visitedPeaks.has(peak.name);
+            const completionInfo = visitedPeaks.get(peak.name);
+            const isCompleted = !!completionInfo;
   
             const marker = new google.maps.Marker({
                 position: { lat: peak.lat, lng: peak.lng },
@@ -92,8 +94,22 @@
                     <div class="p-3">
                         <h3 class="font-bold mb-2">${peak.name}</h3>
                         <p class="text-sm mb-1">Status: ${isCompleted ? '✅ Completed' : '⏳ Not visited yet'}</p>
-                        
-                        <p class="text-sm">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
+                        ${isCompleted ? `
+                            <p class="text-sm mb-1">During: ${completionInfo.activityName}</p>
+                            <p class="text-sm">
+                                <a 
+                                    href="https://www.strava.com/activities/${completionInfo.activityId}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style="color: #FC4C02; font-weight: 500; text-decoration: none;"
+                                    onmouseover="this.style.textDecoration='underline'"
+                                    onmouseout="this.style.textDecoration='none'"
+                                >
+                                    View on Strava
+                                </a>
+                            </p>
+                        ` : ''}
+                        <p class="text-sm mt-2">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
                     </div>
                 `;
                 infowindow.setContent(content);
@@ -103,8 +119,6 @@
             markers.push(marker);
         });
     }
-
-    
   
     // Watch for changes in visitedPeaks
     $: if (visitedPeaks && map) {
@@ -115,11 +129,11 @@
     onMount(() => {
         initMap();
     });
-  </script>
+</script>
   
-  <div bind:this={mapElement} id="map"></div>
+<div bind:this={mapElement} id="map"></div>
   
-  <style>
+<style>
     #map {
         width: 100%;
         height: 900px;
@@ -133,4 +147,8 @@
     :global(.gm-style-iw-d) {
         overflow: hidden !important;
     }
-  </style>
+
+    :global(.gm-style-iw-t::after) {
+        background: linear-gradient(45deg, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0) 100%) !important;
+    }
+</style>
