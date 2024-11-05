@@ -1,101 +1,152 @@
-```svelte
 <script>
-    import Map from '../../components/Map.svelte';
     import { onMount } from 'svelte';
     import { peaks } from '$lib/ethels';
-    import { stravaStore } from '$lib/stores/stravaStore';
-    
-    let error = null;
-    let visitedPeaks = new Set();
-    let isLoaded = false;
+    import { formatDate } from '$lib/peakUtils';
+    export let stravaData = null;
+    export let visitedPeaks = new Map();
 
-    function processVisitedPeaks(activities) {
-        if (!activities) return new Set();
-        
-        const visited = new Set();
-        activities.forEach(activity => {
-            if (activity.start_latlng) {
-                peaks.forEach(peak => {
-                    const distance = getDistanceFromLatLonInKm(
-                        activity.start_latlng[0],
-                        activity.start_latlng[1],
-                        peak.lat,
-                        peak.lng
-                    );
-                    if (distance <= 0.2) {
-                        visited.add(peak.name);
-                    }
-                });
-            }
-        });
-        return visited;
-    }
+    let mapElement;
+    let map;
+    let markers = [];
+    let infowindow;
+    let legend;
 
-    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = deg2rad(lat2 - lat1);
-        const dLon = deg2rad(lon2 - lon1);
-        const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
+    function initMap() {
+        if (typeof google !== 'undefined') {
+            map = new google.maps.Map(mapElement, {
+                zoom: 9,
+                center: { lat: 53.346, lng: -1.815 },
+                mapTypeId: 'terrain',
+                mapTypeControl: true,
+                fullscreenControl: true,
+                streetViewControl: false
+            });
 
-    function deg2rad(deg) {
-        return deg * (Math.PI/180);
-    }
-
-    $: if ($stravaStore.activities && !isLoaded) {
-        try {
-            visitedPeaks = processVisitedPeaks($stravaStore.activities);
-            isLoaded = true;
-        } catch (err) {
-            console.error('Error processing activities:', err);
-            error = err.message;
+            infowindow = new google.maps.InfoWindow();
+            addMarkers();
+            createLegend();
         }
     }
 
+    function createLegend() {
+        legend = document.createElement('div');
+        legend.className = 'bg-white p-3 rounded shadow-lg m-2';
+        updateLegend();
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(legend);
+    }
+
+    function updateLegend() {
+        if (legend && map) {
+            legend.innerHTML = `
+                <div class="text-sm font-bold mb-2">Peak Status</div>
+                <div class="flex items-center mb-1">
+                    <div class="w-4 h-4 rounded-full bg-[#44FF44] mr-2"></div>
+                    <span class="text-sm">Completed (${visitedPeaks.size})</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded-full bg-[#FF4444] mr-2"></div>
+                    <span class="text-sm">Not visited (${peaks.length - visitedPeaks.size})</span>
+                </div>
+            `;
+        }
+    }
+
+    function addMarkers() {
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+
+        const uncompletedIcon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF4444',
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#FFFFFF',
+            scale: 8
+        };
+
+        const completedIcon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#44FF44',
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#FFFFFF',
+            scale: 8
+        };
+
+        peaks.forEach((peak, index) => {
+            const completionInfo = visitedPeaks.get(peak.name);
+            const isCompleted = !!completionInfo;
+
+            const marker = new google.maps.Marker({
+                position: { lat: peak.lat, lng: peak.lng },
+                map: map,
+                title: peak.name,
+                icon: isCompleted ? completedIcon : uncompletedIcon,
+                animation: google.maps.Animation.DROP,
+                optimized: true,
+                zIndex: peaks.length - index
+            });
+
+            marker.addListener('click', () => {
+                const content = `
+                    <div class="p-3">
+                        <h3 class="font-bold mb-2">${peak.name}</h3>
+                        <p class="text-sm mb-1">Status: ${isCompleted ? '✅ Completed' : '⏳ Not visited yet'}</p>
+                        ${isCompleted ? `
+                            <p class="text-sm mb-1">Completed: ${formatDate(completionInfo.date)}</p>
+                            <p class="text-sm mb-1">During: ${completionInfo.activityName}</p>
+                            <p class="text-sm">
+                                <a 
+                                    href="https://www.strava.com/activities/${completionInfo.activityId}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style="color: #FC4C02; font-weight: 500; text-decoration: none;"
+                                    onmouseover="this.style.textDecoration='underline'"
+                                    onmouseout="this.style.textDecoration='none'"
+                                >
+                                    View on Strava
+                                </a>
+                            </p>
+                        ` : ''}
+                        <p class="text-sm mt-2">Location: ${peak.lat.toFixed(4)}, ${peak.lng.toFixed(4)}</p>
+                    </div>
+                `;
+                infowindow.setContent(content);
+                infowindow.open(map, marker);
+            });
+
+            markers.push(marker);
+        });
+    }
+
+    $: if (visitedPeaks && map) {
+        addMarkers();
+        updateLegend();
+    }
+
     onMount(() => {
-        stravaStore.refreshData();
+        initMap();
     });
 </script>
 
-<div class="container mx-auto py-8 px-4">
-    {#if error}
-        <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
-            {error}
-        </div>
-    {/if}
+<div bind:this={mapElement} id="map"></div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div class="bg-LP p-6 rounded-lg shadow-lg text-center">
-            <h3 class="text-2xl font-bold text-Orange mb-2">
-                {visitedPeaks.size}
-            </h3>
-            <p class="text-DG">Peaks Completed</p>
-        </div>
-        <div class="bg-LP p-6 rounded-lg shadow-lg text-center">
-            <h3 class="text-2xl font-bold text-Orange mb-2">
-                {peaks.length - visitedPeaks.size}
-            </h3>
-            <p class="text-DG">Peaks Remaining</p>
-        </div>
-        <div class="bg-LP p-6 rounded-lg shadow-lg text-center">
-            <h3 class="text-2xl font-bold text-Orange mb-2">
-                {Math.round((visitedPeaks.size / peaks.length) * 100)}%
-            </h3>
-            <p class="text-DG">Challenge Progress</p>
-        </div>
-    </div>
+<style>
+    #map {
+        width: 100%;
+        height: 900px;
+        border-radius: 0.5rem;
+    }
 
-    <!-- Map Container -->
-    {#if isLoaded}
-        <div class="bg-LG rounded-lg shadow-lg overflow-hidden">
-            <Map stravaData={$stravaStore.activities} {visitedPeaks} />
-        </div>
-    {/if}
-</div>
-```
+    :global(.gm-style-iw) {
+        padding: 0 !important;
+    }
+    
+    :global(.gm-style-iw-d) {
+        overflow: hidden !important;
+    }
+    
+    :global(.gm-style-iw-t::after) {
+        background: linear-gradient(45deg, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0) 100%) !important;
+    }
+</style>
