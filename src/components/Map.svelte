@@ -96,6 +96,7 @@
                         <p class="text-sm mb-1">Status: ${isCompleted ? '✅ Completed' : '⏳ Not visited yet'}</p>
                         ${isCompleted ? `
                             <p class="text-sm mb-1">During: ${completionInfo.activityName}</p>
+                            <p class="text-sm mb-1">During: ${formatDate(info.date)}</p>
                             <p class="text-sm">
                                 <a 
                                     href="https://www.strava.com/activities/${completionInfo.activityId}"
@@ -120,6 +121,8 @@
             markers.push(marker);
         });
     }
+
+   
   
     // Watch for changes in visitedPeaks
     $: if (visitedPeaks && map) {
