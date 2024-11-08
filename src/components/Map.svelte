@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { peaks } from '$lib/ethels';
-    import { getDistanceFromLatLonInKm, checkPeakVisit } from '$lib/peakUtils';
+    import { getDistanceFromLatLonInKm, checkPeakVisit, formatDate } from '$lib/peakUtils';
     export let stravaData = null;
     export let visitedPeaks = new Map();
   
